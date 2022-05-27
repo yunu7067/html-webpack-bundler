@@ -1,14 +1,34 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const {glob} = require('glob');
+
+const getTemplates = () => glob.sync('./src/templates/**.html').map(file => file.match(/\/templates\/(.+)\.html$/)[1]);
+
+const getEntries = () => {
+  const entries = {common: './src/index.js'};
+  getTemplates().forEach(templateName => {
+    entries[templateName] = `./src/js/${templateName}.js`;
+  });
+  return entries;
+};
+
+const getHtmlWebpackPlugins = () => {
+  return getTemplates().map(
+    templateName =>
+      new HtmlWebpackPlugin({
+        filename: `${templateName}.html`,
+        template: `./src/templates/${templateName}.html`,
+        chunks: ['common', templateName],
+      }),
+  );
+};
+
+// console.log(getHtmlWebpackPlugins());
 
 /** @type {import('webpack').Configuration} */
 module.exports = {
-  entry: {
-    index: './src/index.js',
-    main: './src/js/main.js',
-    test: './src/js/test.js',
-  },
+  entry: getEntries(),
   output: {
     filename: 'static/js/[name].bundle.js',
     path: path.resolve(__dirname, 'out'),
@@ -58,16 +78,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: './src/templates/index.html',
-      chunks: ['index', 'main'],
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'test.html',
-      template: './src/templates/test.html',
-      chunks: ['index', 'test'],
-    }),
+    ...getHtmlWebpackPlugins(),
     new MiniCssExtractPlugin({
       filename: `static/[name].css`,
     }),
