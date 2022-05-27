@@ -1,0 +1,21 @@
+body {
+	background: thistle;
+}
+
+#nanas {
+    list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+
+	li {
+		flex:none;
+		display: inline-block;
+		padding: 1rem;
+
+		img {
+			display: block;
+			object-fit: cover;
+		}
+	}
+
+}
